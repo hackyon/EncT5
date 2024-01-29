@@ -13,6 +13,7 @@
 """ EncT5 model (based on HuggingFace T5 Model) """
 
 from typing import Optional, List, Tuple, Union
+import logging
 
 import torch
 from torch import nn
@@ -86,6 +87,11 @@ class EncT5(EncT5PreTrainedModel):
     def __init__(self, config: T5Config):
         super().__init__(config)
 
+        # Initialize the base T5 model.
+        if config.num_decoder_layers != 1:
+            logging.warning(
+                "EncT5 should use exactly 1 decoder layer. We recommended that you set config.num_decoder_layers=1."
+            )
         self.transformer = T5Model(config)
 
         # Initiate decoder embedding from scratch and define the corresponding latent vector vocabulary size.
