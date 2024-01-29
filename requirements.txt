@@ -1,0 +1,8 @@
+transformers==4.37.1
+torch==2.1.0
+numpy==1.26.3
+sentencepiece==0.1.99
+accelerate==0.26.1
+evaluate==0.4.1
+datasets==2.16.1
+scikit-learn==1.4.0
