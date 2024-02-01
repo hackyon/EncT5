@@ -82,7 +82,6 @@ class EncT5(EncT5PreTrainedModel):
     non-autoregressive tasks such as classification and regression.
     """
     _keys_to_ignore_on_load_unexpected = ["decoder.block.0.layer.1.EncDecAttention.relative_attention_bias.weight"]
-    _tied_weights_keys = ["transformer.encoder.embed_tokens.weight", "transformer.decoder.embed_tokens.weight"]
 
     def __init__(self, config: T5Config):
         super().__init__(config)
