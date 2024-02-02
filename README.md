@@ -4,14 +4,14 @@ Implementation of `EncT5` based
 on [Fine-tuning T5 Encoder for Non-autoregressive Tasks](https://arxiv.org/abs/2110.08426).
 
 EncT5 is a variant of T5 that utilizes mainly the encoder for non-autoregressive (ie. classification and regression)
-tasks. Initially, it uses the same weights at T5, but **must be fine-tuned before use**. There are several special
+tasks. It re-uses the same pretrained weights at T5, but **must be fine-tuned before use**. There are several special 
 features to EncT5:
 
-1. There are less decoder layers (a single decoder layer by default), and so has fewer parameters/resources than the
-   standard T5.
+1. There are less decoder layers (a single decoder layer by default), and so has fewer parameters/uses less resources
+   than the standard T5.
 2. There is a separate decoder word embedding, with the decoder input ids being predefined constants. During
-   fine-tuning, the decoder embedding learns to use these constants as "prompts" to the encoder for the corresponding
-   classification/regression tasks.
+   fine-tuning, the decoder word embedding learns to use these constants as "prompts" to the encoder for the 
+   corresponding classification/regression tasks.
 3. There is a classification head on top of the decoder output.
 
 Research has shown that this model can be more efficient and usable over T5 and BERT for non-autoregressive
