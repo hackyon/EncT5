@@ -13,7 +13,6 @@
 """ EncT5 model (based on HuggingFace T5 Model) """
 
 from typing import Optional, List, Tuple, Union
-import logging
 
 import torch
 from torch import nn
@@ -21,11 +20,13 @@ from torch.nn import BCEWithLogitsLoss, CrossEntropyLoss, MSELoss
 from transformers.models.t5.modeling_t5 import T5Config, T5PreTrainedModel, T5Model
 from transformers.modeling_outputs import Seq2SeqSequenceClassifierOutput
 
+from .configuration_enct5 import EncT5Config
+
 
 class EncT5ClassificationHead(nn.Module):
     """Head for sentence-level classification tasks."""
 
-    def __init__(self, config: T5Config):
+    def __init__(self, config: EncT5Config):
         super().__init__()
         self.dropout = nn.Dropout(p=config.classifier_dropout)
         self.out_proj = nn.Linear(config.d_model, config.num_labels)
@@ -39,7 +40,7 @@ class EncT5ClassificationHead(nn.Module):
 class EncT5MultiLabelClassificationHead(nn.Module):
     """Head for multi-label sentence-level classification tasks."""
 
-    def __init__(self, config: T5Config):
+    def __init__(self, config: EncT5Config):
         super().__init__()
         self.weights = nn.Parameter(torch.Tensor(config.num_labels, config.d_model))
         self.biases = nn.Parameter(torch.Tensor(config.num_labels))
@@ -69,7 +70,7 @@ class EncT5PreTrainedModel(T5PreTrainedModel):
         super()._init_weights(module)
 
 
-class EncT5(EncT5PreTrainedModel):
+class EncT5ForSequenceClassification(EncT5PreTrainedModel):
     r"""
     The EncT5 model was proposed in [EncT5: A Framework for Fine-tuning T5 as Non-autoregressive
     Models](https://arxiv.org/abs/2110.08426) by Frederick Liu, Terry Huang, Shihang Lyu, Siamak Shakeri, Hongkun Yu,
@@ -81,24 +82,16 @@ class EncT5(EncT5PreTrainedModel):
     of the output. Research has shown that this model can be more efficient and usable over T5 and BERT for
     non-autoregressive tasks such as classification and regression.
     """
+    config_class = EncT5Config
     _keys_to_ignore_on_load_unexpected = ["decoder.block.0.layer.1.EncDecAttention.relative_attention_bias.weight"]
 
-    def __init__(self, config: T5Config):
+    def __init__(self, config: EncT5Config):
         super().__init__(config)
 
         # Initialize the base T5 model.
-        if config.num_decoder_layers != 1:
-            logging.warning(
-                "EncT5 should use exactly 1 decoder layer. We recommended that you set config.num_decoder_layers=1."
-            )
-        self.transformer = T5Model(config)
+        self.transformer = T5Model(T5Config.from_dict(config.to_dict()))
 
         # Initiate decoder embedding from scratch and define the corresponding latent vector vocabulary size.
-        if not hasattr(config, 'decoder_vocab_size'):
-            if config.problem_type == "multi_label_classification":
-                config.decoder_vocab_size = config.num_labels
-            else:
-                config.decoder_vocab_size = 1
         self.decoder_embeddings = nn.Embedding(config.decoder_vocab_size, config.d_model)
         self.transformer.get_decoder().set_input_embeddings(self.decoder_embeddings)
 
@@ -112,6 +105,10 @@ class EncT5(EncT5PreTrainedModel):
         self.post_init()
 
         self.model_parallel = False
+
+    def load_weights_from_pretrained_t5(self, model_path: str):
+        pretrained_t5_model = T5Model.from_pretrained(model_path)
+        self.transformer.load_state_dict(pretrained_t5_model.state_dict(), strict=False)
 
     def prepare_for_fine_tuning(self):
         r"""

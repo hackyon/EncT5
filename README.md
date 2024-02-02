@@ -18,6 +18,8 @@ tasks such as classification and regression.
 
 ## Quickstart
 
+### Running from HuggingFace Model Hub (Remote Code)
+
 Here is an example of fine-tuning and validating EncT5 over SST2 (positive/negative sentiment analysis over
 sentences) in the [GLUE](https://huggingface.co/datasets/glue) dataset.
 
@@ -34,11 +36,10 @@ First, we load the train dataset and use it to fine-tune the EncT5 model:
     tokenized_train_dataset = train_dataset.map(tokenize_function, batched=True)
     data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
 
-    # Load the EncT5 model from t5-base and prepare it for fine tuning
-    config = T5Config.from_pretrained("t5-base", problem_type="single_label_classification", num_labels=2,
-                                      num_decoder_layers=1, decoder_vocab_size=1)
-    model = EncT5.from_pretrained("t5-base", config=config)
-    model.prepare_for_fine_tuning()
+    # Load the EncT5ForSequenceClassification model from HuggingFace Model Hub
+    # It is recommended that you pin the model to a certain revision. See
+    # https://huggingface.co/docs/transformers/custom_models#using-a-model-with-custom-code
+    model = AutoModelForSequenceClassification.from_pretrained("hackyon/enct5-base", trust_remote_code=True)
 
     # Define the compute metrics function for training
     def compute_metrics(eval_preds):
@@ -73,7 +74,7 @@ Then, we loaded the fine-tuned model and evaluate it with the validation dataset
                                              truncation=True, padding=True)
 
     # Load the fine-tuned EncT5 model.
-    model = EncT5.from_pretrained("./enct5-glue-sst2/")
+    model = AutoModelForSequenceClassification.from_pretrained("./enct5-glue-sst2/")
 
     # Predict
     output = model(tokenized_validation_dataset["input_ids"])
@@ -85,6 +86,30 @@ Then, we loaded the fine-tuned model and evaluate it with the validation dataset
     # Compute and output metric
     metric = evaluate.load("glue", "sst2")
     print(metric.compute(predictions=predictions, references=validation_dataset["label"]))
+
+
+
+### Running from Source on Github
+
+The code for training is the same, but you will need to load the model using the following code instead:
+
+    # Copy the base values from the original T5 config.
+    t5_config = T5Config.from_pretrained("t5-base")
+    config = EncT5Config.from_dict(t5_config.to_dict())
+
+    # Configure the values specifically for EncT5. The following are the recommended config values.
+    config.num_decoder_layers = 1
+
+    config.problem_type = "single_label_classification"
+    config.num_labels = 2
+    config.decoder_vocab_size = 1
+
+    # Create the model, load the weights from the original T5, and prepare it for fine-tuning.
+    model = EncT5ForSequenceClassification(config)
+    model.load_weights_from_pretrained_t5("t5-base")
+    model.prepare_for_fine_tuning()
+
+    # Continue the fine-tuning...
 
 ## Installation
 
