@@ -4,8 +4,8 @@ Implementation of `EncT5` based
 on [Fine-tuning T5 Encoder for Non-autoregressive Tasks](https://arxiv.org/abs/2110.08426).
 
 EncT5 is a variant of T5 that utilizes mainly the encoder for non-autoregressive (ie. classification and regression)
-tasks. It uses the same base weights at T5, but requires fine-tuning before use. There are several special features to
-EncT5:
+tasks. It uses the same base weights at T5, but **must be fine-tuning before use**. There are several special features
+to EncT5:
 
 1. There are less decoder layers (a single decoder layer by default), and so saves on parameters/resources.
 2. There is a separate decoder word embedding, with the decoder input ids being predefined constants. During
@@ -25,7 +25,7 @@ sentences) in the [GLUE](https://huggingface.co/datasets/glue) dataset.
 
 First, we load the train dataset and use it to fine-tune the EncT5 model:
 
-    # Load training SST2 dataset from GLUE
+    # Load training SST2 dataset from GLUE.
     train_dataset = load_dataset("glue", "sst2", split="train")
     metric = evaluate.load("glue", "sst2")
 
@@ -36,19 +36,19 @@ First, we load the train dataset and use it to fine-tune the EncT5 model:
     tokenized_train_dataset = train_dataset.map(tokenize_function, batched=True)
     data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
 
-    # Load the EncT5ForSequenceClassification model from HuggingFace Model Hub
+    # Load the EncT5ForSequenceClassification model from HuggingFace Model Hub.
     # It is recommended that you pin the model to a certain revision. See
     # https://huggingface.co/docs/transformers/custom_models#using-a-model-with-custom-code
     model = AutoModelForSequenceClassification.from_pretrained("hackyon/enct5-base", trust_remote_code=True)
 
-    # Define the compute metrics function for training
+    # Define the compute metrics function for training.
     def compute_metrics(eval_preds):
         output, labels = eval_preds
         logits = output[0]
         predictions = np.argmax(logits, axis=-1)
         return metric.compute(predictions=predictions, references=labels)
 
-    # Fine-tune the model
+    # Fine-tune the model.
     training_args = TrainingArguments("glue-sst2-trainer", evaluation_strategy="epoch")
     trainer = Trainer(
         model,
@@ -80,10 +80,10 @@ Then, we loaded the fine-tuned model and evaluate it with the validation dataset
     output = model(tokenized_validation_dataset["input_ids"])
     logits = output[0]
 
-    # Select the label with the largest logits value (skipping softmax) 
+    # Select the label with the largest logits value (skipping softmax).
     predictions = np.argmax(logits.detach(), axis=-1) 
 
-    # Compute and output metric
+    # Compute and output metric.
     metric = evaluate.load("glue", "sst2")
     print(metric.compute(predictions=predictions, references=validation_dataset["label"]))
 
