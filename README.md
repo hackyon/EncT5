@@ -7,14 +7,17 @@ EncT5 is a variant of T5 that utilizes mainly the encoder for non-autoregressive
 tasks. It uses the same base weights at T5, but **must be fine-tuning before use**. There are several special features
 to EncT5:
 
-1. There are less decoder layers (a single decoder layer by default), and so saves on parameters/resources.
+1. There are less decoder layers (a single decoder layer by default), and so has fewer parameters/resources than the
+   standard T5.
 2. There is a separate decoder word embedding, with the decoder input ids being predefined constants. During
-   fine-tuning, these constants are trained to effectively "prompt" the encoder to perform the necessary
+   fine-tuning, the decoder embedding learns to use these constants as "prompts" to the encoder for the corresponding
    classification/regression tasks.
 3. There is a classification head on top of the decoder output.
 
 Research has shown that this model can be more efficient and usable over T5 and BERT for non-autoregressive
 tasks such as classification and regression.
+
+This model (the t5-base variant) can be found on the [HuggingFace model hub](https://huggingface.co/hackyon/enct5-base).
 
 ## Quickstart
 
