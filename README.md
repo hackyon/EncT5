@@ -56,10 +56,10 @@ First, we load the train dataset and use it to fine-tune the EncT5 model:
     # Fine-tune the model.
     training_args = TrainingArguments(
         "glue-sst2-trainer",
-        save_strategy="epoch",
-        evaluation_strategy="epoch",
+        save_strategy="steps",
+        evaluation_strategy="steps",
         load_best_model_at_end=True,
-        metric_for_best_model="loss",
+        metric_for_best_model="accuracy",
         greater_is_better=True,
     )
     trainer = Trainer(
