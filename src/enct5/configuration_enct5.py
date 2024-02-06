@@ -131,3 +131,6 @@ class EncT5Config(PretrainedConfig):
             is_encoder_decoder=is_encoder_decoder,
             **kwargs,
         )
+
+        # Override the default behavior to tie word embeddings.
+        self.tie_word_embeddings = False

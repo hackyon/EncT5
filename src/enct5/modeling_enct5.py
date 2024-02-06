@@ -93,7 +93,6 @@ class EncT5ForSequenceClassification(EncT5PreTrainedModel):
 
         # Initiate decoder embedding from scratch and define the corresponding latent vector vocabulary size.
         self.decoder_embeddings = nn.Embedding(config.decoder_vocab_size, config.d_model)
-        self.transformer.get_decoder().set_input_embeddings(self.decoder_embeddings)
 
         # Initiate decoder projection head from scratch.
         if config.problem_type == "multi_label_classification":
@@ -115,6 +114,7 @@ class EncT5ForSequenceClassification(EncT5PreTrainedModel):
         Prepares the model for fine-tuning by re-initializing the necessary weights for fine-tuning. This step should be
         performed after loading the pre-trained T5 model but before fine-tuning.
         """
+        self.transformer.get_decoder().set_input_embeddings(self.decoder_embeddings)
         self.transformer.get_decoder().apply(self._init_weights)
         self._init_weights(self.classification_head)
 
