@@ -18,6 +18,10 @@ Research has shown that this model can be more efficient and usable over T5 and 
 tasks such as classification and regression.
 
 This model (the t5-base variant) can be found on the [HuggingFace model hub](https://huggingface.co/hackyon/enct5-base).
+You can also find a fine-tuned version of this model (on the
+[GLUE SST2](https://huggingface.co/datasets/glue/viewer/sst2) dataset) for positive/negative sentiment analysis
+[here](https://huggingface.co/hackyon/enct5-base-glue-sst2).  
+
 
 ## Quickstart
 
@@ -72,9 +76,15 @@ First, we load the train dataset and use it to fine-tune the EncT5 model:
         compute_metrics=compute_metrics,
     )
     trainer.train()
-    trainer.save_model("./enct5-glue-sst2/")
+    trainer.save_model("./enct5-base-glue-sst2/")
 
-Then, we load the fine-tuned model and generate predictions on the test set.
+You can find a version of this saved model on the HuggingFace model hub 
+[here](https://huggingface.co/hackyon/enct5-base-glue-sst2). Since this model has been fine-tuned, you can use it
+directly for sentiment analysis without further fine-tuning.
+
+If you would like to evaluate the model on the test dataset (on the 
+[GLUE benchmarking website](https://gluebenchmark.com/), you can load the fine-tuned model and generate predictions 
+accordingly.
 
     # Load validation SST2 dataset from GLUE
     metric = evaluate.load("glue", "sst2")
@@ -88,7 +98,7 @@ Then, we load the fine-tuned model and generate predictions on the test set.
     tokenizer = T5Tokenizer.from_pretrained("t5-base")
 
     # Load the fine-tuned EncT5 model.
-    model = AutoModelForSequenceClassification.from_pretrained("./enct5-glue-sst2/", trust_remote_code=True)
+    model = AutoModelForSequenceClassification.from_pretrained("./enct5-base-glue-sst2/", trust_remote_code=True)
 
     # Predict
     all_predictions = []
