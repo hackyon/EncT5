@@ -74,7 +74,7 @@ First, we load the train dataset and use it to fine-tune the EncT5 model:
     trainer.train()
     trainer.save_model("./enct5-glue-sst2/")
 
-Then, we loaded the fine-tuned model and evaluate it with the test dataset:
+Then, we load the fine-tuned model and generate predictions on the test set.
 
     # Load validation SST2 dataset from GLUE
     metric = evaluate.load("glue", "sst2")
@@ -107,10 +107,12 @@ Then, we loaded the fine-tuned model and evaluate it with the test dataset:
         predictions = np.argmax(logits.detach(), axis=-1)
    
         all_predictions.extend(predictions)
-   
-    # Compute and output metric.
-    metric = evaluate.load("glue", "sst2")
-    print(metric.compute(predictions=all_predictions, references=test_dataset["label"]))
+
+    df_all_predictions = pd.DataFrame({"index": range(len(all_predictions)), "prediction": all_predictions})
+    df_all_predictions.to_csv("SST-2.tsv", sep="\t", index=False)
+
+The test set output predictions (`SST-2.tsv`) can then be submitted to the 
+[GLUE benchmarking website](https://gluebenchmark.com/) for final evaluation.
 
 ### Running from Source on Github
 
