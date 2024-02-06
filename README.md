@@ -86,7 +86,7 @@ Then, we loaded the fine-tuned model and evaluate it with the test dataset:
                                        truncation=True, padding=True)
 
     # Load the fine-tuned EncT5 model.
-    model = AutoModelForSequenceClassification.from_pretrained("./enct5-glue-sst2/")
+    model = AutoModelForSequenceClassification.from_pretrained("./enct5-glue-sst2/", trust_remote_code=True)
 
     # Predict
     output = model(tokenized_test_dataset["input_ids"])
