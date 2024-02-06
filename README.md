@@ -106,7 +106,7 @@ Then, we load the fine-tuned model and generate predictions on the test set.
         # Select the label with the largest logits value (skipping softmax).
         predictions = np.argmax(logits.detach(), axis=-1)
    
-        all_predictions.extend(predictions)
+        all_predictions.extend(predictions.squeeze().numpy())
 
     df_all_predictions = pd.DataFrame({"index": range(len(all_predictions)), "prediction": all_predictions})
     df_all_predictions.to_csv("SST-2.tsv", sep="\t", index=False)
