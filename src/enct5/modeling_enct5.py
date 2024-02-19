@@ -67,7 +67,6 @@ class EncT5PreTrainedModel(T5PreTrainedModel):
         elif isinstance(module, EncT5MultiLabelClassificationHead):
             module.weights.data.normal_(mean=0.0, std=factor * ((self.config.d_model) ** -0.5))
             module.biases.data.zero_()
-        super()._init_weights(module)
 
 
 class EncT5ForSequenceClassification(EncT5PreTrainedModel):
@@ -120,7 +119,7 @@ class EncT5ForSequenceClassification(EncT5PreTrainedModel):
         Prepares the model for fine-tuning by re-initializing the necessary weights for fine-tuning. This step should be
         performed after loading the pre-trained T5 model but before fine-tuning.
         """
-        self.transformer.get_decoder().apply(self._init_weights)
+        self.decoder_embeddings.weight.data.normal_(mean=0.0, std=self.config.initializer_factor)
         self._init_weights(self.classification_head)
 
     def forward(
